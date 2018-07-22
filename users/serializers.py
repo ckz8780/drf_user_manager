@@ -20,15 +20,14 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',) # Just so we know for deletions/updates
 
     def validate(self, data):
+        print("validating...")
         """
         Validate passwords by utilizing Django's built in validators
         """
         user = User(**data)
-        password = data.get('password')
         errors = dict()
-        
         try:
-            django_pw_validators.validate_password(password=password, user=user)
+            django_pw_validators.validate_password(password=data.get('password'), user=user)
         except ValidationError as e:
             errors['password'] = list(e.messages)
 
