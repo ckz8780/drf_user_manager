@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
-        read_only_fields = ('id',)
+        read_only_fields = ('id',) # Just so we know for deletions/updates
 
     def validate(self, data):
         """
@@ -36,3 +36,11 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return super(UserSerializer, self).validate(data)
+
+    def create(self, validated_data):
+        """
+        We need to override the default create method or the ModelSerializer
+        will not hash passwords correctly. 
+        """
+        user = User.objects.create_user(**validated_data)
+        return user
