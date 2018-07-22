@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 class UserTests(APITestCase):
 
-    def setUp(self):
+    def setup(self):
         """
         Setup stuff: create three users to play with, two regular and one admin.
         """
@@ -37,7 +37,7 @@ class UserTests(APITestCase):
         self.assertTrue(test_admin_user.is_staff)
         self.assertTrue(test_admin_user.is_superuser)
 
-    def test_create_user_anonymously(self):
+    def test_can_create_user_anonymously(self):
         """
         Confirm that anyone can create a username via /api/v1/users/create/
         """
@@ -75,22 +75,6 @@ class UserTests(APITestCase):
         for k, v in response.data.items():
             if k not in ignore_response_fields:
                 self.assertEqual(v, data[k])
-
-    def test_password_not_in_create_user_api_response(self):
-        """
-        Confirm that the API does not return the password in the response.
-        """
-        url = reverse('create-user')
-        data = {
-            "username": "createduser",
-            "first_name": "Created",
-            "last_name": "User",
-            "email": "created@example.com",
-            "password": "regularUser!"
-        }
-        response = self.client.post(url, data, format='json')
-
-        self.assertNotIn('password', response.data.keys())
 
     def test_cannot_update_user_anonymously(self):
         """
@@ -183,3 +167,64 @@ class UserTests(APITestCase):
         for k, v in response.data.items():
             if k not in ignore_response_fields:
                 self.assertEqual(v, getattr(user, k))
+
+    def test_password_not_in_create_user_api_response(self):
+        """
+        Confirm that the API does not return the password in the response
+        to creating a user.
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_201_CREATED)
+        self.assertNotIn('password', response.data.keys())
+
+    def test_password_not_in_update_user_api_response(self):
+        """
+        Confirm that the API does not return the password in the response
+        to updating a user.
+        """
+        url = reverse('update-user', args=[2]) # Try to update the test user (pk=2)
+        data = {
+            "username": "updated_test_user",
+            "first_name": "Updated",
+            "last_name": "User",
+            "email": "updated@example.com",
+            "password": "totally_different_password!"
+        }
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.put(url, data, format='json')
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertNotIn('password', response.data.keys())
+
+    def test_password_not_in_delete_user_api_response(self):
+        """
+        Confirm that the API does not return the password in the response
+        to updating a user.
+        """
+        url = reverse('delete-user', args=[2]) # Try to update the test user (pk=2)
+        data = {
+            "username": "updated_test_user",
+            "first_name": "Updated",
+            "last_name": "User",
+            "email": "updated@example.com",
+            "password": "totally_different_password!"
+        }
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.delete(url, data, format='json')
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_204_NO_CONTENT)
+        self.assertIs(response.data, None)
