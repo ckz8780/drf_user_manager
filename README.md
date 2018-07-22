@@ -6,7 +6,7 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 
 #### Setup:
 
-	- setup
+	- setUp
 	- test_setup_created_correct_test_users
 
 #### User Creation:
@@ -26,6 +26,7 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 	- test_regular_user_cannot_delete_other_user
 	- test_user_cannot_delete_self
 	- test_admin_user_can_delete_regular_user
+	- test_admin_user_can_delete_self
 
 #### API Responses/Security:
 

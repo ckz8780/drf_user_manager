@@ -5,7 +5,9 @@ from django.contrib.auth.models import User
 
 class UserTests(APITestCase):
 
-    def setup(self):
+    # SETUP TESTS
+
+    def setUp(self):
         """
         Setup stuff: create three users to play with, two regular and one admin.
         """
@@ -36,6 +38,18 @@ class UserTests(APITestCase):
         self.assertTrue(test_admin_user.is_active)
         self.assertTrue(test_admin_user.is_staff)
         self.assertTrue(test_admin_user.is_superuser)
+
+
+
+
+
+
+
+
+
+
+
+    # USER CREATION TESTS
 
     def test_can_create_user_anonymously(self):
         """
@@ -75,6 +89,17 @@ class UserTests(APITestCase):
         for k, v in response.data.items():
             if k not in ignore_response_fields:
                 self.assertEqual(v, data[k])
+
+
+
+
+
+
+
+
+
+
+    # USER UPDATE TESTS
 
     def test_cannot_update_user_anonymously(self):
         """
@@ -168,6 +193,91 @@ class UserTests(APITestCase):
             if k not in ignore_response_fields:
                 self.assertEqual(v, getattr(user, k))
 
+
+
+
+
+
+
+
+
+    # USER DELETION TESTS
+
+    def test_cannot_delete_user_anonymously(self):
+        """
+        Confirm that we cannot delete a user anonymously
+        """
+        url = reverse('delete-user', args=[2]) # Try to delete the test user (pk=2)
+        
+        self.client.force_authenticate(user=None) # No authentication
+        response = self.client.delete(url)
+        response_detail = response.data['detail']
+        response_status = response.status_code        
+
+        self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_detail, 'Authentication credentials were not provided.')
+
+    def test_regular_user_cannot_delete_other_user(self):
+        """
+        Confirm an unprivileged (non-staff/su) user cannot delete another user
+        """
+        url = reverse('delete-user', args=[3]) # Try to delete the test user (pk=3) as test user (pk=2)
+        
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.delete(url)
+        response_detail = response.data['detail']
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_detail, 'You do not have permission to perform this action.')
+
+    def test_user_cannot_delete_self(self):
+        """
+        Confirm an unprivileged (non-staff/su) user cannot delete their own account
+        """
+        url = reverse('delete-user', args=[3]) # Try to delete the test user (pk=3) as same user
+        
+        self.client.login(username='testuser2', password='testpassword2')
+        response = self.client.delete(url)
+        response_detail = response.data['detail']
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_detail, 'You do not have permission to perform this action.')
+
+    def test_admin_user_can_delete_regular_user(self):
+        """
+        Confirm an admin user can delete an unprivileged user's account
+        """
+        url = reverse('delete-user', args=[2]) # Try to delete the test user (pk=2) as admin
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.delete(url)
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_204_NO_CONTENT)
+
+    def test_admin_user_can_delete_self(self):
+        """
+        Confirm an admin user can delete their own account
+        """
+        url = reverse('delete-user', args=[1]) # Try to delete the test user (pk=2) as admin
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.delete(url)
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response_detail, 'You do not have permission to perform this action.')
+
+
+
+
+
+
+
+    # API SECURITY/RESPONSE TESTS
+
     def test_password_not_in_create_user_api_response(self):
         """
         Confirm that the API does not return the password in the response
@@ -211,19 +321,12 @@ class UserTests(APITestCase):
     def test_password_not_in_delete_user_api_response(self):
         """
         Confirm that the API does not return the password in the response
-        to updating a user.
+        to deleting a user.
         """
         url = reverse('delete-user', args=[2]) # Try to update the test user (pk=2)
-        data = {
-            "username": "updated_test_user",
-            "first_name": "Updated",
-            "last_name": "User",
-            "email": "updated@example.com",
-            "password": "totally_different_password!"
-        }
         
         self.client.login(username='testadminuser', password='testadminpassword')
-        response = self.client.delete(url, data, format='json')
+        response = self.client.delete(url)
         response_status = response.status_code
 
         self.assertEqual(response_status, status.HTTP_204_NO_CONTENT)
