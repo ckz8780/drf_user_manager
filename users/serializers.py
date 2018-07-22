@@ -15,8 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'password')
         extra_kwargs = {'password': {'write_only': True}}
+        read_only_fields = ('id',)
 
     def validate(self, data):
         """
@@ -24,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         user = User(**data)
         password = data.get('password')
-        errors = dict() 
+        errors = dict()
         
         try:
             django_pw_validators.validate_password(password=password, user=user)
@@ -35,8 +36,3 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return super(UserSerializer, self).validate(data)
-
-    def create(self, validated_data):
-        user = User(**validated_data)
-        user.save()
-        return user
