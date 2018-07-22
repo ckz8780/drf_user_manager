@@ -20,35 +20,18 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',) # Just so we know for deletions/updates
 
     def validate(self, data):
-        print("validating...")
         """
         Validate passwords by utilizing Django's built in validators
         """
         user = User(**data)
         errors = dict()
-        try:
-            django_pw_validators.validate_password(password=data.get('password'), user=user)
-        except ValidationError as e:
-            errors['password'] = list(e.messages)
+        if data.get('password'):
+            try:
+                django_pw_validators.validate_password(password=data.get('password'), user=user)
+            except ValidationError as e:
+                errors['password'] = list(e.messages)
 
         if errors:
             raise serializers.ValidationError(errors)
 
         return super(UserSerializer, self).validate(data)
-
-    def create(self, validated_data):
-        """
-        We need to override the default create method or the ModelSerializer
-        will not hash passwords correctly. 
-        """
-        user = User.objects.create_user(**validated_data)
-        return user
-
-    def update(self, instance, validated_data):
-        instance.username = validated_data['username']
-        instance.first_name = validated_data['first_name']
-        instance.last_name = validated_data['last_name']
-        instance.email = validated_data['email']
-        instance.set_password(validated_data['password'])
-        instance.save()
-        return instance
