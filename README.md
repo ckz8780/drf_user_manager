@@ -23,7 +23,7 @@ The API validates password strength with Django's built in password validators.
 
 #### Updating Users:
 
-**/api/v1/users/<pk>/update/**
+**/api/v1/users/`id`/update/**
 
 	- Allowed Methods: PUT (full updates), PATCH (partial updates)
 	- Access: Admin and authenticated object owners
@@ -45,7 +45,7 @@ The API validates password strength with Django's built in password validators.
 
 #### Deleting Users:
 
-**/api/v1/users/<pk>/delete/**
+**/api/v1/users/`id`/delete/**
 
 	- Allowed Methods: DELETE
 	- Access: Admin users only
