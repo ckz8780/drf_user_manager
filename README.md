@@ -11,7 +11,7 @@ The API validates password strength with Django's built in password validators.
 **/api/v1/users/create/**
 
 	- Allowed Methods: POST
-	- Access: Anonymous
+	- Access: Allow any
 	- Required Data Format:
 		{
 			"username": "someusername",
