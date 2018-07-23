@@ -8,16 +8,16 @@ Provides the ability to create/update/delete users via a Django REST API. No lis
 
 **/api/v1/users/create/**
 
-		- Allowed Methods: POST
-		- Access: Anonymous
-		- Required Data Format:
-			{
-				"username":"someusername",
-				"first_name":"Firstname",
-				"last_name":"Lastname",
-				"email":"email@example.com",
-				"password":"somePassword!"
-			}
+	- Allowed Methods: POST
+	- Access: Anonymous
+	- Required Data Format:
+		{
+			"username":"someusername",
+			"first_name":"Firstname",
+			"last_name":"Lastname",
+			"email":"email@example.com",
+			"password":"somePassword!"
+		}
 
 #### Updating Users:
 
