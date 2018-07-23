@@ -1,6 +1,54 @@
 # DRF User Manager
 
-Provides the ability to add/update/delete users via a Django REST API. No listing capabilities are allowed. This is a "write only" API.
+Provides the ability to create/update/delete users via a Django REST API. No listing capabilities are allowed. This is a "write only" API, which uses explicit view types and allowed methods to allow very specific access. There is no API root.
+
+## Endpoints:
+
+#### Creating Users:
+
+**/api/v1/users/create/**
+
+		- Allowed Methods: POST
+		- Access: Anonymous
+		- Required Data Format:
+			{
+				"username":"someusername",
+				"first_name":"Firstname",
+				"last_name":"Lastname",
+				"email":"email@example.com",
+				"password":"somePassword!"
+			}
+
+#### Updating Users:
+
+**/api/v1/users/<pk>/update/**
+
+	- Allowed Methods: PUT (full updates), PATCH (partial updates)
+	- Access: Admin and authenticated object owners
+	- Required Data Format:
+		PUT requests:
+			{
+				"username":"newusername",
+				"first_name":"newfirstname",
+				"last_name":"newlastname",
+				"email":"newemail@example.com",
+				"password":"newPassword!"
+			}
+
+		PATCH requests:
+			{
+				"username":"newusername"
+				... other valid fields
+			}
+
+#### Deleting Users:
+
+**/api/v1/users/<pk>/delete/**
+
+	- Allowed Methods: DELETE
+	- Access: Admin users only
+	- Required Data Format:
+		DELETE request (no payload)
 
 *This API implements a number of automated tests to ensure proper functionality*
 
@@ -14,6 +62,7 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 #### User Creation:
 
 	- test_can_create_user_anonymously
+	- test_created_user_can_actually_login
 	
 	  Username Validation:
 	- test_cannot_create_user_with_blank_username
@@ -37,6 +86,7 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 	- test_regular_user_cannot_update_other_users_info
 	- test_regular_user_can_update_own_info
 	- test_admin_user_can_update_regular_users_info
+	- test_partial_update_fails_with_put_request
 
 	- test_regular_user_can_partially_update_own_info
 	- test_admin_user_can_partially_update_own_info
@@ -58,3 +108,4 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 	- test_password_not_in_delete_user_api_response
 	- test_password_is_hashed_properly_on_create
 	- test_password_is_hashed_properly_on_update
+	- test_get_request_disabled_for_all_views

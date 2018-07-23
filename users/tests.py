@@ -72,6 +72,30 @@ class UserTests(APITestCase):
         self.assertEqual(response_status, status.HTTP_201_CREATED)
         self.assertIsInstance(new_user, User)
 
+    def test_created_user_can_actually_login(self):
+        """
+        Confirm that a user can actually login with their username/pw
+        after creation
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')
+        new_user = User.objects.get(username='createduser')
+        bad_login = self.client.login(username='createduser', password='fail!')
+        good_login = self.client.login(username='createduser', password='regularUser!')        
+        response_status = response.status_code
+
+        self.assertEqual(response_status, status.HTTP_201_CREATED)
+        self.assertIsInstance(new_user, User)
+        self.assertFalse(bad_login)
+        self.assertTrue(good_login)
+
     def test_cannot_create_user_with_blank_username(self):
         """
         Confirm that a user cannot be created with a blank username
@@ -366,6 +390,27 @@ class UserTests(APITestCase):
             if k not in ignore_response_fields:
                 self.assertEqual(v, getattr(user, k))
 
+    def test_partial_update_fails_with_put_request(self):
+        """
+        Confirm that a partial update fails when calling update with PUT.
+        PUT requires all fields. This test deliberately leaves out email.
+        """
+        url = reverse('update-user', args=[2]) # Try to update the test user (pk=2)
+        data = {
+            "username": "updated_test_user",
+            "first_name": "Updated",
+            "last_name": "User",
+            "password": "totally_different_password!"
+        }
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.put(url, data, format='json')
+        response_status = response.status_code
+        response_detail = response.data['email'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(response_detail, 'This field is required.')
+
     def test_regular_user_can_partially_update_own_info(self):
         """
         Confirm that a user can partially update their own user info
@@ -635,3 +680,20 @@ class UserTests(APITestCase):
         self.assertIn('_sha256', original_password)
         self.assertIn('_sha256', new_password)
         self.assertNotEqual(original_password, new_password)
+
+    def test_get_request_disabled_for_all_views(self):
+        """
+        Confirm that the API disallows GET requests for all views
+        """
+        create_url = reverse('create-user')
+        update_url = reverse('update-user', args=[1])
+        delete_url = reverse('delete-user', args=[1])
+
+        self.client.login(username='testadminuser', password='testadminpassword')
+        create_response = self.client.get(create_url)
+        update_response = self.client.get(update_url)
+        delete_response = self.client.get(delete_url)
+
+        self.assertEqual(create_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(update_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(delete_response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
