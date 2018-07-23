@@ -72,23 +72,35 @@ class UserTests(APITestCase):
         self.assertEqual(response_status, status.HTTP_201_CREATED)
         self.assertIsInstance(new_user, User)
 
-    def test_api_response_to_user_creation_matches_post_data(self):
-        """
-        Confirm that the API responds w/ the same fields it was told to create
-        """
-        url = reverse('create-user')
-        data = {
-            "username": "createduser",
-            "first_name": "Created",
-            "last_name": "User",
-            "email": "created@example.com",
-            "password": "regularUser!"
-        }
-        response = self.client.post(url, data, format='json')
-        ignore_response_fields = ['id', 'password']
-        for k, v in response.data.items():
-            if k not in ignore_response_fields:
-                self.assertEqual(v, data[k])
+    def test_cannot_create_user_with_blank_username(self):
+        pass
+
+    def test_cannot_create_user_with_long_username(self):
+        pass
+
+    def test_cannot_create_user_with_invalid_username(self):
+        pass
+
+    def test_cannot_create_user_with_blank_email(self):
+        pass
+
+    def test_cannot_create_user_with_invalid_email(self):
+        pass
+
+    def test_cannot_create_user_with_short_password(self):
+        pass
+
+    def test_cannot_create_user_with_common_password(self):
+        pass
+
+    def test_cannot_create_user_with_numeric_password(self):
+        pass
+
+    def test_cannot_create_user_with_blank_password(self):
+        pass
+
+    def test_cannot_create_user_with_password_like_personal_info(self):
+        pass
 
 
 
@@ -143,7 +155,7 @@ class UserTests(APITestCase):
         self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_detail, 'You do not have permission to perform this action.')
 
-    def test_user_can_update_own_info(self):
+    def test_regular_user_can_update_own_info(self):
         """
         Confirm that a user can update their own user info
         """
@@ -192,6 +204,16 @@ class UserTests(APITestCase):
         for k, v in response.data.items():
             if k not in ignore_response_fields:
                 self.assertEqual(v, getattr(user, k))
+
+    def test_regular_user_can_partially_update_own_info(self):
+        pass
+
+    def test_admin_user_can_partially_update_own_info(self):
+        pass
+
+    def test_admin_user_can_partially_update_regular_users_info(self):
+        pass
+
 
 
 
@@ -257,7 +279,7 @@ class UserTests(APITestCase):
 
         self.assertEqual(response_status, status.HTTP_204_NO_CONTENT)
 
-    def test_admin_user_can_delete_self(self):
+    def test_admin_user_cannot_delete_self(self):
         """
         Confirm an admin user can delete their own account
         """
@@ -266,6 +288,7 @@ class UserTests(APITestCase):
         self.client.login(username='testadminuser', password='testadminpassword')
         response = self.client.delete(url)
         response_status = response.status_code
+        response_detail = response.data['detail']
 
         self.assertEqual(response_status, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response_detail, 'You do not have permission to perform this action.')
@@ -277,6 +300,24 @@ class UserTests(APITestCase):
 
 
     # API SECURITY/RESPONSE TESTS
+
+    def test_api_response_to_user_creation_matches_post_data(self):
+        """
+        Confirm that the API responds w/ the same fields it was told to create
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')
+        ignore_response_fields = ['id', 'password']
+        for k, v in response.data.items():
+            if k not in ignore_response_fields:
+                self.assertEqual(v, data[k])
 
     def test_password_not_in_create_user_api_response(self):
         """
