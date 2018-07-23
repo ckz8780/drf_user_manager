@@ -2,6 +2,8 @@
 
 Provides the ability to add/update/delete users via a Django REST API. No listing capabilities are allowed. This is a "write only" API.
 
+*This API implements a number of automated tests to ensure proper functionality*
+
 ## Tests implemented:
 
 #### Setup:
@@ -13,13 +15,16 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 
 	- test_can_create_user_anonymously
 	
+	  Username Validation:
 	- test_cannot_create_user_with_blank_username
 	- test_cannot_create_user_with_long_username
 	- test_cannot_create_user_with_invalid_username
 	
+	  Email Validation:
 	- test_cannot_create_user_with_blank_email
 	- test_cannot_create_user_with_invalid_email
 
+	  Password Validation:
 	- test_cannot_create_user_with_short_password
 	- test_cannot_create_user_with_common_password
 	- test_cannot_create_user_with_numeric_password

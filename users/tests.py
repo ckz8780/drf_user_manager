@@ -168,19 +168,100 @@ class UserTests(APITestCase):
         self.assertEqual(response_detail, 'Enter a valid email address.')
 
     def test_cannot_create_user_with_short_password(self):
-        pass
+        """
+        Confirm that a user cannot be created with a short password
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "foo"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['password'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('This password is too short.', response_detail)
 
     def test_cannot_create_user_with_common_password(self):
-        pass
+        """
+        Confirm that a user cannot be created with a common password
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "password"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['password'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'This password is too common.')
 
     def test_cannot_create_user_with_numeric_password(self):
-        pass
+        """
+        Confirm that a user cannot be created with an entirely numeric password
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "1234567890"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['password'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'This password is entirely numeric.')
 
     def test_cannot_create_user_with_blank_password(self):
-        pass
+        """
+        Confirm that a user cannot be created with a blank password
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": ""
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['password'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'This field may not be blank.')
 
     def test_cannot_create_user_with_password_like_personal_info(self):
-        pass
+        """
+        Confirm that a user cannot be created with a username that matches
+        too closly with other personal info (first name, username, etc)
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "createduser"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['password'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'The password is too similar to the username.')
 
 
 
