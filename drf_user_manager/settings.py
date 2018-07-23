@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
+    '127.0.0.1',
     'ckz8780-drf-user-manager.herokuapp.com',
 ]
 
@@ -130,4 +131,5 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+STATIC_ROOT = '/staticfiles/'
 STATIC_URL = '/static/'
