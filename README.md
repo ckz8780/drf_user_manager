@@ -1,6 +1,8 @@
 # DRF User Manager
 
-Provides the ability to create/update/delete users via a Django REST API. No listing capabilities are allowed. This is a "write only" API, which uses explicit view types and allowed methods to allow very specific access. There is no API root.
+Provides the ability to create/update/delete users via a Django REST API. No listing capabilities are allowed, even for superusers. This is a "write only" API, which uses explicit view types and allowed methods to allow very specific access. There is no API root.
+
+The API validates password strength with Django's built in password validators.
 
 ## Endpoints:
 
@@ -12,11 +14,11 @@ Provides the ability to create/update/delete users via a Django REST API. No lis
 	- Access: Anonymous
 	- Required Data Format:
 		{
-			"username":"someusername",
-			"first_name":"Firstname",
-			"last_name":"Lastname",
-			"email":"email@example.com",
-			"password":"somePassword!"
+			"username": "someusername",
+			"first_name": "Firstname",
+			"last_name": "Lastname",
+			"email": "email@example.com",
+			"password": "somePassword!"
 		}
 
 #### Updating Users:
@@ -28,16 +30,16 @@ Provides the ability to create/update/delete users via a Django REST API. No lis
 	- Required Data Format:
 		PUT requests:
 			{
-				"username":"newusername",
-				"first_name":"newfirstname",
-				"last_name":"newlastname",
-				"email":"newemail@example.com",
-				"password":"newPassword!"
+				"username": "newusername",
+				"first_name": "newfirstname",
+				"last_name": "newlastname",
+				"email": "newemail@example.com",
+				"password": "newPassword!"
 			}
 
 		PATCH requests:
 			{
-				"username":"newusername"
+				"username": "newusername"
 				... other valid fields
 			}
 
