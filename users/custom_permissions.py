@@ -8,5 +8,9 @@ class IsOwnerOrAdmin(BasePermission):
         return request.user.is_staff or obj == request.user
 
 class IsNotSameUser(BasePermission):
+    """
+    Returns true if user is not the object subject.
+    Verifies that users can't delete themselves.
+    """
     def has_object_permission(self, request, view, obj):
         return request.user != obj
