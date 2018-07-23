@@ -367,13 +367,67 @@ class UserTests(APITestCase):
                 self.assertEqual(v, getattr(user, k))
 
     def test_regular_user_can_partially_update_own_info(self):
-        pass
+        """
+        Confirm that a user can partially update their own user info
+        """
+        url = reverse('update-user', args=[2]) # Try to partially update the test user (pk=2)
+        data = {
+            "username": "updated_test_user"
+        }
+        
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.patch(url, data, format='json')
+        response_status = response.status_code
+        user = User.objects.get(username='updated_test_user')
+        ignore_response_fields = ['id', 'password']
+
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertIsInstance(user, User)
+        for k, v in response.data.items():
+            if k not in ignore_response_fields:
+                self.assertEqual(v, getattr(user, k))
 
     def test_admin_user_can_partially_update_own_info(self):
-        pass
+        """
+        Confirm that an admin user can partially update their own info
+        """
+        url = reverse('update-user', args=[1]) # Try to partially update the admin user (pk=1)
+        data = {
+            "username": "updated_admin_user"
+        }
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.patch(url, data, format='json')
+        response_status = response.status_code
+        user = User.objects.get(username='updated_admin_user')
+        ignore_response_fields = ['id', 'password']
+
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertIsInstance(user, User)
+        for k, v in response.data.items():
+            if k not in ignore_response_fields:
+                self.assertEqual(v, getattr(user, k))
 
     def test_admin_user_can_partially_update_regular_users_info(self):
-        pass
+        """
+        Confirm that an admin user can partially update someone else's user info
+        """
+        url = reverse('update-user', args=[2]) # Try to partially update the test user (pk=2)
+        data = {
+            "username": "updated_test_user"
+        }
+        
+        self.client.login(username='testadminuser', password='testadminpassword')
+        response = self.client.patch(url, data, format='json')
+        response_status = response.status_code
+        user = User.objects.get(username='updated_test_user')
+        ignore_response_fields = ['id', 'password']
+
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertIsInstance(user, User)
+        for k, v in response.data.items():
+            if k not in ignore_response_fields:
+                self.assertEqual(v, getattr(user, k))
 
 
 
@@ -533,3 +587,51 @@ class UserTests(APITestCase):
 
         self.assertEqual(response_status, status.HTTP_204_NO_CONTENT)
         self.assertIs(response.data, None)
+
+    def test_password_is_hashed_properly_on_create(self):
+        """
+        Confirm that the API hashes the password properly on user creation.
+        A properly hashed password will return the SHA256 hash as a string.
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')
+        response_status = response.status_code
+        new_user = User.objects.get(username='createduser')
+        password = new_user.password
+
+        self.assertEqual(response_status, status.HTTP_201_CREATED)
+        self.assertIn('_sha256', password)
+
+    def test_password_is_hashed_properly_on_update(self):
+        """
+        Confirm that the API actually changes the password when asked to,
+        thatit's properly hashed, and that it's actually different.
+        """
+        url = reverse('update-user', args=[2]) # Try to update the test user (pk=2)
+        data = {
+            "username": "updated_test_user",
+            "first_name": "Updated",
+            "last_name": "User",
+            "email": "updated@example.com",
+            "password": "totally_different_password!"
+        }
+        
+        self.client.login(username='testuser', password='testpassword')
+        original_user = User.objects.get(username='testuser')
+        original_password = original_user.password
+        response = self.client.put(url, data, format='json')
+        response_status = response.status_code
+        new_user = User.objects.get(username='updated_test_user')
+        new_password = new_user.password
+
+        self.assertEqual(response_status, status.HTTP_200_OK)
+        self.assertIn('_sha256', original_password)
+        self.assertIn('_sha256', new_password)
+        self.assertNotEqual(original_password, new_password)

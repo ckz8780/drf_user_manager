@@ -56,3 +56,5 @@ Provides the ability to add/update/delete users via a Django REST API. No listin
 	- test_password_not_in_create_user_api_response
 	- test_password_not_in_update_user_api_response
 	- test_password_not_in_delete_user_api_response
+	- test_password_is_hashed_properly_on_create
+	- test_password_is_hashed_properly_on_update
