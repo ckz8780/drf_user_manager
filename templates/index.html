@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="A User Management API - https://www.github.com/ckz8780">
+	<meta name="author" content="ckz8780">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+	<title>DRF User Manager</title>
+</head>
+
+<body>
+	<header class="container-fluid bg-info">
+		<div class="row text-center">
+			<div class="col">
+				<h1 class="display-4 font-weight-bold my-5 text-white">DRF User Manager API</h1>
+			</div>
+		</div>
+	</header>
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col">
+				<h3 class="text-success">User Creation:</h3>
+			</div>
+			<div class="col text-right">
+				<p class="h5"><a href="/" target="_blank">Home</a> | <a href="/admin/" target="_blank">Admin</a></p>
+			</div>
+		</div>
+		<div class="row jumbotron">
+			<div class="col">
+				<p>Create a user with a password too similar to their username <span class="text-primary">(Denied - password is too similar to username)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "magicuser@somesite.com", "password": "magicUser!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+
+				<p>Create a user with a good password but invalid email <span class="text-primary">(Denied - need a valid email)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "bademail", "password": "betterPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+
+				<p>Create a valid user <span class="text-primary">(OK - User Created)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "magicuser@somesite.com", "password": "betterPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+
+				<p>Create the same user again <span class="text-primary">(Denied - user already exists)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "magicuser@somesite.com", "password": "betterPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+
+				<p>Create a different user w/ the same email <span class="text-primary">(Denied - email must be unique)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "magicuser2", "first_name": "Magic", "last_name": "User", "email": "magicuser@somesite.com", "password": "betterPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<h3 class="text-info">User Updates:</h3>
+			</div>
+		</div>
+		<div class="row jumbotron">
+			<div class="col">
+				<p>Try to update user without auth <span class="text-primary">(Denied - need to authenticate)</span>:</p>
+				<code>curl -X PUT -H "Content-Type: application/json" --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "newemail@somesite.com", "password": "newPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/3/update/</code><br><br>
+
+				<p>Update user with valid regular credentials <span class="text-primary">(OK - password and email updated)</span>:</p>
+				<code>curl -X PUT -H "Content-Type: application/json" -u magicuser --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "newemail@somesite.com", "password": "newPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/3/update/</code><br><br>
+
+				<p>Try to update other user with valid regular creds <span class="text-primary">(Denied - you're not an admin)</span>:</p>
+				<code>curl -X PUT -H "Content-Type: application/json" -u magicuser --data '{"username": "magicuser", "first_name": "Magic", "last_name": "User", "email": "newemail@somesite.com", "password": "newPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/2/update/</code><br><br>
+
+				<p>Update other user with valid admin creds <span class="text-primary">(Denied - Missing username field for PUT request</span>)</p>
+				<code>curl -X PUT -H "Content-Type: application/json" -u admin --data '{"first_name": "Test", "last_name": "User", "email": "test@test.com", "password": "goodPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/2/update/</code><br><br>
+
+				<p>Update other user with valid admin creds <span class="text-primary">(OK - user updated)</span>:</p>
+				<code>curl -X PUT -H "Content-Type: application/json" -u admin --data '{"username": "testuser123", "first_name": "Test", "last_name": "User", "email": "test@test.com", "password": "goodPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/2/update/</code><br><br>
+
+				<p>Partial Update other user with valid admin creds <span class="text-primary">(OK - Using PATCH request so user is updated)</span>:</p>
+				<code>curl -X PATCH -H "Content-Type: application/json" -u admin --data '{"email": "updatedemail@test.com"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/2/update/</code><br><br>
+
+				<p>Partial Update self with valid creds, but weak password <span class="text-primary">(Denied - password is too short)</span>:</p>
+				<code>curl -X PATCH -H "Content-Type: application/json" -u testuser123 --data '{"password": "foo"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/2/update/</code><br><br>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<h3 class="text-danger">User Deletion:</h3>
+			</div>
+		</div>
+		<div class="row jumbotron">
+			<div class="col">
+				<p>Create a new user to be deleted <span class="text-primary">(OK - user created)</span>:</p>
+				<code>curl -X POST -H "Content-Type: application/json" --data '{"username": "baduser-deleteme", "first_name": "Baduser", "last_name": "Deleteme", "email": "baduser@deleteme.com", "password": "baduserPassword!"}' https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/create/</code><br><br>
+
+				<p>Delete user with valid creds as self <span class="text-primary">(Denied - you can't delete your own account)</span>:</p>
+				<code>curl -X DELETE -u baduser-deleteme https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/4/delete/</code><br><br>
+
+				<p>Delete other user with valid creds as self <span class="text-primary">(Denied - you're not an admin so you can't delete someone else's account)</span>:</p>
+				<code>curl -X DELETE -u baduser-deleteme https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/3/delete/</code><br><br>
+
+				<p>Delete other user with valid creds as admin <span class="text-primary">(OK - account deleted)</span>:</p>
+				<code>curl -X DELETE -u admin https://ckz8780-drf-user-manager.herokuapp.com/api/v1/users/4/delete/</code><br><br>
+			</div>
+		</div>
+
+		<div class="row text-center my-5">
+			<div class="col">
+				<p class="h5"><a href="https://www.github.com/ckz8780/drf_user_manager" target="_blank">GitHub Source</a></p>
+			</div>
+		</div>
+
+	</div>
+	<footer class="container-fluid bg-info">
+		<div class="row text-center">
+			<div class="col">
+				<p class="h5 my-5">Made with pride by ckz8780. Check out my <a class="text-white" href="https://www.github.com/ckz8780" target="_blank">GitHub!</a></p>
+			</div>
+		</div>
+	</footer>
+</body>
+</html>
+
