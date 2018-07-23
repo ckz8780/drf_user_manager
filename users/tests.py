@@ -73,19 +73,99 @@ class UserTests(APITestCase):
         self.assertIsInstance(new_user, User)
 
     def test_cannot_create_user_with_blank_username(self):
-        pass
+        """
+        Confirm that a user cannot be created with a blank username
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['username'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'This field may not be blank.')
 
     def test_cannot_create_user_with_long_username(self):
-        pass
+        """
+        Confirm that a user cannot be created with a username > 150 chars
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "a"*151,
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['username'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'Ensure this field has no more than 150 characters.')
 
     def test_cannot_create_user_with_invalid_username(self):
-        pass
+        """
+        Confirm that a user cannot be created with an invalid username
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "abc!!",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "created@example.com",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['username'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Enter a valid username.', response_detail)
 
     def test_cannot_create_user_with_blank_email(self):
-        pass
+        """
+        Confirm that a user cannot be created with a blank email
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['email'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'This field may not be blank.')
 
     def test_cannot_create_user_with_invalid_email(self):
-        pass
+        """
+        Confirm that a user cannot be created with an invalid email
+        """
+        url = reverse('create-user')
+        data = {
+            "username": "createduser",
+            "first_name": "Created",
+            "last_name": "User",
+            "email": "bad.email",
+            "password": "regularUser!"
+        }
+        response = self.client.post(url, data, format='json')        
+        response_status = response.status_code
+        response_detail = response.data['email'][0]
+
+        self.assertEqual(response_status, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_detail, 'Enter a valid email address.')
 
     def test_cannot_create_user_with_short_password(self):
         pass
